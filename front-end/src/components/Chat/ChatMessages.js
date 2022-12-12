@@ -1,37 +1,39 @@
 import { Avatar, Box, List, Paper, Typography } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import socket from "../../config/socket";
-import UserContext from "../../context/UserContext";
-import useEventSubscription from "../../hooks/useMessages";
+import useAuth from "../../hooks/useAuth";
+import useUser from "../../hooks/useUser";
+import api from "../../services/api";
+import { socketApi } from "../../services/socketApi";
 import { string_to_color } from "../../utils/utils";
 
+const styles = {
+  chatBox: {
+    height: "calc(100% - 75px)",
+    width: "100%",
+    padding: "10px",
+    overflowY: "scroll",
+  },
+  selfMessage: { display: "flex", justifyContent: "flex-end" },
+  message: { display: "flex" },
+};
+
 export default function ChatArea() {
-  const { username, room } = useContext(UserContext);
+  const { token } = useAuth();
+  const { username, setUsername, room } = useUser();
   const [messages, setMessages] = useState([]);
 
-  const styles = {
-    chatBox: {
-      height: "calc(100% - 75px)",
-      width: "100%",
-      padding: "10px",
-      overflowY: "scroll",
-    },
-    selfMessage: { display: "flex", justifyContent: "flex-end" },
-    message: { display: "flex" },
-  };
-
   useEffect(() => {
-    socket.emit(
-      "select_room",
-      {
-        username,
-        room,
-      },
-      (response) => {
-        setMessages(response);
-        console.log(messages);
-      }
-    );
+    async function loadPage() {
+      if (!token) return;
+
+      const { data } = await api.connectChat(token);
+      setUsername(data.username);
+
+      await socketApi.connectRoom({ username, room }, setMessages);
+    }
+
+    loadPage();
     // eslint-disable-next-line
   }, []);
 
@@ -39,7 +41,7 @@ export default function ChatArea() {
 
   const addMessage = (...newMessage) =>
     setMessages((messages) => [...messages, ...newMessage]);
-  useEventSubscription("message", addMessage);
+  socketApi.useEventSubscription("message", addMessage);
 
   return (
     <List sx={styles.chatBox}>
@@ -47,6 +49,7 @@ export default function ChatArea() {
         const date = new Date(message.createdAt.toString());
         return (
           <Box
+            key={i}
             sx={
               message.username === username
                 ? styles.selfMessage
@@ -71,7 +74,7 @@ export default function ChatArea() {
             <Paper
               sx={{ margin: "10px 0", width: "fit-content", padding: "0 10px" }}
             >
-              <Typography key={i} variant="body2" display="block">
+              <Typography key={i} variant="body2" style={{ display: "block", wordBreak:"break-word" }}>
                 {message.text}
               </Typography>
               <Typography

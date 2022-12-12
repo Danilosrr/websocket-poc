@@ -6,14 +6,11 @@ import SignIn from "./components/Login/SignIn";
 import SignUp from "./components/Login/SignUp";
 import { AlertProvider } from "./context/AlertContext";
 import { AuthProvider } from "./context/AuthContext";
-import UserContext from "./context/UserContext";
+import { UserProvider } from "./context/UserContext";
 
 export default function App() {
-  const room = "Sala";
-  const username = "Danilo2";
-
   return (
-    <UserContext.Provider value={{ room, username }}>
+    <UserProvider>
       <AlertProvider>
         <AuthProvider>
           <BrowserRouter>
@@ -26,6 +23,6 @@ export default function App() {
           <Alert />
         </AuthProvider>
       </AlertProvider>
-    </UserContext.Provider>
+    </UserProvider>
   );
 }

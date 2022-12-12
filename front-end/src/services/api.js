@@ -13,16 +13,21 @@ function getConfig(token) {
 }
 
 async function signUp(signUpData) {
-  await baseAPI.post("/signup", signUpData);
+  return await baseAPI.post("/signup", signUpData);
 }
 
 async function signIn(signInData) {
-  return baseAPI.post("/signin", signInData);
+  return await baseAPI.post("/signin", signInData);
+}
+
+async function connectChat(token) {
+  return await baseAPI.post("/chat/connect", {}, getConfig(token));
 }
 
 const api = {
   signUp,
-  signIn
+  signIn,
+  connectChat,
 };
 
 export default api;

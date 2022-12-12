@@ -1,9 +1,12 @@
 import socket from "../../config/socket";
-import { useContext, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Box, Button, InputAdornment, Paper, TextField } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
+import LogoutIcon from "@mui/icons-material/Logout";
 import ChatArea from "./ChatMessages";
-import UserContext from "../../context/UserContext";
+import useUser from "../../hooks/useUser";
+import useAuth from "../../hooks/useAuth";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const styles = {
   container: {
@@ -18,12 +21,25 @@ const styles = {
     overflow: "hidden",
   },
   chatInput: { height: "45px", width: "100%" },
+  logout: {
+    position: "fixed",
+    fontSize: '20px',
+    top: "1px",
+    left: "1px",
+    color: "rgba(255, 0, 0, 0.5)",
+  },
 };
 
 export default function Chat() {
+  const navigate = useNavigate();
+  const { token, signOut } = useAuth();
+  const { username, room } = useUser();
   const inputRef = useRef();
   const [text, setText] = useState("");
-  const { username, room } = useContext(UserContext);
+
+  if (!token) {
+    return <Navigate to={"/signin"} replace />;
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -33,6 +49,11 @@ export default function Chat() {
     inputRef.current.focus();
   }
 
+  function handleSignOut() {
+    signOut();
+    navigate("/signin");
+  }
+
   return (
     <Box sx={styles.container}>
       <ChatArea />
@@ -40,7 +61,7 @@ export default function Chat() {
         <TextField
           required
           sx={styles.chatInput}
-          placeholder={"Send a message on room " + room}
+          placeholder={"Message to " + room}
           value={text}
           ref={inputRef}
           onChange={(e) => setText(e.target.value)}
@@ -60,6 +81,7 @@ export default function Chat() {
           }}
         />
       </Paper>
+      <LogoutIcon sx={styles.logout} onClick={handleSignOut}/>
     </Box>
   );
 }

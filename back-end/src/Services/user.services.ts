@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { conflictError, forbiddenError, notFoundError } from "../Middlewares/errorHandler.js";
+import { conflictError, forbiddenError } from "../Middlewares/errorHandler.js";
 import Cryptr from "cryptr";
 import { userRepository } from "../Repositories/user.repository.js";
 import { createUser } from "../Interfaces/user.interface.js";
