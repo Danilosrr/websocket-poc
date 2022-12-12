@@ -35,10 +35,10 @@ async function signInService(login: createUser) {
   const { username, password } = login;
 
   const userFound = await userRepository.findByUsername(username);
-  if (!userFound) throw notFoundError("user not found");
+  if (!userFound) throw forbiddenError("incorrect password or username");
 
   const passwordMatch = compare(password, userFound.password);
-  if (!passwordMatch) throw forbiddenError("incorrect password");
+  if (!passwordMatch) throw forbiddenError("incorrect password or username");
 
   const token = jwt.sign({ username, id: userFound.id }, process.env.JWT_KEY, {
     expiresIn: "24h",

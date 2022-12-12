@@ -1,9 +1,9 @@
 import { Avatar, Box, List, Paper, Typography } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
-import socket from "../config/socket";
-import UserContext from "../context/UserContext";
-import useEventSubscription from "../hooks/useMessages";
-import { string_to_color } from "../utils/utils";
+import socket from "../../config/socket";
+import UserContext from "../../context/UserContext";
+import useEventSubscription from "../../hooks/useMessages";
+import { string_to_color } from "../../utils/utils";
 
 export default function ChatArea() {
   const { username, room } = useContext(UserContext);

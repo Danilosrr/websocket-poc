@@ -1,9 +1,9 @@
-import socket from "../config/socket";
+import socket from "../../config/socket";
 import { useContext, useRef, useState } from "react";
 import { Box, Button, InputAdornment, Paper, TextField } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import ChatArea from "./ChatMessages";
-import UserContext from "../context/UserContext";
+import UserContext from "../../context/UserContext";
 
 const styles = {
   container: {
