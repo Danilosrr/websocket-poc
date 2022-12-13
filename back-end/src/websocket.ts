@@ -1,66 +1,37 @@
 import { io } from "./app.js";
-
-interface RoomUser {
-  socket_id: string;
-  username: string;
-  room: string;
-}
-
-interface Message {
-  room: string;
-  text: string;
-  username: string;
-  createdAt: Date;
-}
-
-const users: RoomUser[] = [];
-const messages: Message[] = [];
+import {
+  Message,
+  messagesRepository,
+} from "./Repositories/messages.repository.js";
+import { roomRepository } from "./Repositories/room.repository.js";
+import { userRepository } from "./Repositories/user.repository.js";
 
 io.on("connection", (socket) => {
-  console.log("a user connected");
+  console.log("running");
 
-  socket.on("select_room", (data, callback) => {
+  socket.on("select_room", async (data, callback) => {
     const { room, username } = data;
+
+    const findUser = await userRepository.findByUsername(username);
+    const findRoom = await roomRepository.findByName(room);
+    if (!findUser && !findRoom) return;
 
     socket.join(room);
 
-    const userInRoom = users.find(
-      (user) => user.username === username && user.username === room
-    );
-
-    if (!!userInRoom) {
-      userInRoom.socket_id = socket.id;
-    } else {
-      users.push({
-        room,
-        username,
-        socket_id: socket.id,
-      });
-    }
-
-    const messagesRoom = getMessagesRoom(room);
+    const messagesRoom = await messagesRepository.getRoomMessages(room);
     callback(messagesRoom);
   });
 
-  socket.on("message", ({ room, username, text }) => {
-    // Salvar mensagens
+  socket.on("message", async ({ room, username, text }) => {
     const message: Message = {
       room,
       username,
       text,
-      createdAt: new Date(),
+      createdAt: new Date()
     };
 
-    messages.push(message);
+    await messagesRepository.createMessage(message);
 
-    // Enviar para os usuarios da sala especifica
     io.to(room).emit("message", message);
-    console.log(messages);
   });
 });
-
-const getMessagesRoom = (room: string) => {
-  const messagesRoom = messages.filter((message) => message.room === room);
-
-  return messagesRoom;
-};

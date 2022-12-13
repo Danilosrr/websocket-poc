@@ -20,17 +20,23 @@ const styles = {
 
 export default function ChatArea() {
   const { token } = useAuth();
-  const { username, setUsername, room } = useUser();
+  const { setUsername, room } = useUser();
   const [messages, setMessages] = useState([]);
+  const [compareName, setCompareName] = useState([]);
 
   useEffect(() => {
     async function loadPage() {
-      if (!token) return;
+      if (!token) {
+        console.log("no token");
+        return;
+      }
 
       const { data } = await api.connectChat(token);
-      setUsername(data.username);
-
+      const { username } = data;
       await socketApi.connectRoom({ username, room }, setMessages);
+
+      setUsername(username);
+      setCompareName(username);
     }
 
     loadPage();
@@ -51,12 +57,12 @@ export default function ChatArea() {
           <Box
             key={i}
             sx={
-              message.username === username
+              message.username === compareName
                 ? styles.selfMessage
                 : styles.message
             }
           >
-            {message.username === username ? (
+            {message.username === compareName ? (
               <></>
             ) : (
               <Avatar
@@ -74,7 +80,11 @@ export default function ChatArea() {
             <Paper
               sx={{ margin: "10px 0", width: "fit-content", padding: "0 10px" }}
             >
-              <Typography key={i} variant="body2" style={{ display: "block", wordBreak:"break-word" }}>
+              <Typography
+                key={i}
+                variant="body2"
+                style={{ display: "block", wordBreak: "break-word" }}
+              >
                 {message.text}
               </Typography>
               <Typography
